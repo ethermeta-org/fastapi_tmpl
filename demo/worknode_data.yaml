@@ -1,0 +1,6 @@
+- name: Node1
+  endpoint: http://192.168.1.1:2375
+- name: Node2
+  endpoint: http://192.168.1.2:2376
+- name: Node3
+  endpoint: http://192.168.1.3:2377

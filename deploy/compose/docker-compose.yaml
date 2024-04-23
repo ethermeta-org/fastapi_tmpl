@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:2.19.4-alpine
+    command: -H unix:///var/run/docker.sock
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    restart: always
+    ports:
+#      - "9443:9443"
+      - "9000:9000"
+      - "8000:8000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /data/portainer/volumes:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1000M
+        reservations:
+          cpus: '0.25'
+          memory: 200M
+  traefik:
+    image: traefik:2.11.2
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - 80:80
+      - 443:443
+      - 18080:8080 # dashboard
+    labels:
+      - "traefik.http.middlewares.testHeader.headers.customFrameOptionsValue=SAMEORIGIN"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /compose/traefik/traefik.yml:/etc/traefik/traefik.yml
+      - /compose/traefik/conf:/etc/traefik/conf
+      - /compose/traefik/ssl:/etc/traefik/certs

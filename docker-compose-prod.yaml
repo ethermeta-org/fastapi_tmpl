@@ -1,0 +1,41 @@
+version: "3.2"
+services:
+  timescaledb:
+    container_name: timescaledb
+    restart: always
+    image: timescale/timescaledb:2.14.2-pg14
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - TIMESCALEDB_TELEMETRY=off # 生产环境关闭telemetry
+      - TS_TUNE_MAX_BG_WORKERS=8
+      - TS_TUNE_MAX_CONNS=500
+      - TS_TUNE_MEMORY=16GB
+      - TS_TUNE_NUM_CPUS=8
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin" ]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+
+  fastapi-app:
+    container_name: fastapi-app
+    # image: ghcr.io/leetx/onesphere:14 # 实际image的地址
+    depends_on:
+      - timescaledb
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - 9010:9010
+    volumes:
+      - /data/app/logs:/etc/anylinker/logs
+      - ./config.yaml:/etc/anylinker/config.yaml
+    restart: always
+    healthcheck:
+      test: curl -f https://localhost:9010/api/v1/healthz || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    environment:
+      - ENV_RUNTIME_ENV=prod
+      - ENV_ANYLINKER_WITH_DEMO=true #加载demo数据

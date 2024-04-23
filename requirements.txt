@@ -1,0 +1,11 @@
+kubernetes
+fastapi
+uvicorn[standard]
+gunicorn
+loguru
+databases[asyncpg]
+dynaconf
+click
+docker
+Jinja2==3.1.3
+parallel-ssh==2.12.0

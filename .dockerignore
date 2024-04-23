@@ -1,0 +1,6 @@
+*.md
+*.pyc
+*.pyo
+deploy
+tests
+.vscode

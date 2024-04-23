@@ -1,0 +1,37 @@
+http:
+  routers:
+    fastapi_app_portal_non_www_route:
+      rule: "HostRegexp(`fastapi.anylinker.com`)" # 实际的域名
+      entrypoints:
+      - web
+      - websecure
+      tls: {}
+      middlewares:
+      - frameOptionsHeader
+      - hstsHeader
+      service: fastapi_backend
+  middlewares:
+    CORSHeader:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - OPTIONS
+          - PUT
+        accessControlAllowHeaders: "*"
+        accessControlAllowOriginList: "*"
+        accessControlMaxAge: 100
+        addVaryHeader: true
+    hstsHeader:
+      headers:
+        STSSeconds: 31536000
+        browserxssfilter: true
+    frameOptionsHeader:
+      headers:
+        customFrameOptionsValue: SAMEORIGIN #同域名下面的iframe可以正常嵌入
+  services:
+    fastapi_backend:
+      loadBalancer:
+        sticky:
+          cookie: session_id
+        servers:
+        - url: "http://fastapi-app:9000/" #fastapi-app代表的是启动的docker服务的名字
